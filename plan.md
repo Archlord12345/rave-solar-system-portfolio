@@ -1,0 +1,5 @@
+- Interactive 3D Solar System interface where users can navigate between different "planets" representing core portfolio sections such as About Me, Projects, and Skills.
+- Centralized branding for "Rave" acting as the focal point (the Sun) of the system, highlighting their identity and computer science background.
+- Project showcase modules where individual computer science projects are represented as unique celestial bodies that users can explore for more detail.
+- Interactive information overlays that appear when a planet is selected, displaying project descriptions, technical skills, and external links.
+- Seamless navigation experience that allows users to zoom into specific planets or return to the full system view to explore Rave's work.
