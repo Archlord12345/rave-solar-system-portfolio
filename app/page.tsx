@@ -23,7 +23,7 @@ const PROJECTS = [
   {
     id: 1,
     name: 'KERNEL_CHAT',
-    description: 'Application de chat intelligente pour le groupe KERNEL, facilitant la collaboration en temps réel.',
+    description: 'Application de chat intelligente facilitant la collaboration en temps réel.',
     tech: ['n8n', 'React', 'Firebase', 'Node.js'],
     color: '#d4af37', // Gold
     distance: 8,
@@ -34,7 +34,7 @@ const PROJECTS = [
   {
     id: 2,
     name: 'KERNEL_MEETING',
-    description: 'Plateforme de réunion immersive conçue pour optimiser les échanges au sein de KERNEL FORGE.',
+    description: 'Plateforme de réunion immersive conçue pour optimiser les échanges virtuels.',
     tech: ['WebRTC', 'Next.js', 'Socket.io', 'Tailwind'],
     color: '#e5e4e2', // Chrome
     distance: 12,
@@ -262,12 +262,12 @@ export default function Home() {
           className="max-w-2xl"
         >
           <h2 className="text-[#d4af37] font-bold tracking-[0.3em] text-xs uppercase mb-4">Étudiant en Informatique & Développeur Fullstack</h2>
-          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter mb-6 leading-none">
-            KERNEL<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f9f295] to-[#d4af37]">FORGE</span>
+          <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6 leading-none uppercase">
+            NGHOMSI FEUKOUO<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f9f295] to-[#d4af37]">RAVEL</span>
           </h1>
           <p className="text-gray-400 text-lg max-w-md leading-relaxed mb-8">
-            Expert en automatisation intelligente avec n8n et leader du groupe KERNEL FORGE. Je repousse les limites du possible.
+            Expert en automatisation intelligente avec n8n. Passionné par la création de solutions innovantes et l'exploration technologique.
           </p>
           <div className="flex gap-4 pointer-events-auto">
             <button className="px-8 py-4 bg-gradient-to-r from-[#d4af37] to-[#f9f295] text-black font-black rounded-2xl hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all flex items-center gap-2">
