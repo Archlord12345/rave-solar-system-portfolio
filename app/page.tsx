@@ -22,43 +22,47 @@ import * as THREE from 'three';
 const PROJECTS = [
   {
     id: 1,
-    name: 'IA & AUTOMATION',
-    description: 'Expert en automatisation intelligente et workflows autonomes avec n8n et LangChain.',
-    tech: ['n8n', 'LangChain', 'OpenAI', 'GenKit'],
+    name: 'KERNEL_CHAT',
+    description: 'Application de chat intelligente pour le groupe KERNEL, facilitant la collaboration en temps réel.',
+    tech: ['n8n', 'React', 'Firebase', 'Node.js'],
     color: '#d4af37', // Gold
     distance: 8,
     size: 0.8,
     speed: 0.5,
+    link: 'https://github.com/Archlord12345/KERNEL_CHAT'
   },
   {
     id: 2,
-    name: 'FRONTEND & DESIGN',
-    description: 'Interfaces haut de gamme et immersives utilisant React et Framer Motion.',
-    tech: ['Next.js', 'Tailwind', 'Three.js', 'GSAP'],
+    name: 'KERNEL_MEETING',
+    description: 'Plateforme de réunion immersive conçue pour optimiser les échanges au sein de KERNEL FORGE.',
+    tech: ['WebRTC', 'Next.js', 'Socket.io', 'Tailwind'],
     color: '#e5e4e2', // Chrome
     distance: 12,
     size: 1.1,
     speed: 0.3,
+    link: 'https://github.com/Archlord12345/KERNEL_MEETING'
   },
   {
     id: 3,
-    name: 'BACKEND & CLOUD',
-    description: 'Infrastructures robustes et déploiement scalable.',
-    tech: ['Node.js', 'PostgreSQL', 'Docker', 'AWS'],
+    name: 'SOLAR PORTFOLIO',
+    description: 'Ce portfolio immersif en 3D présentant mon système solaire de projets.',
+    tech: ['Three.js', 'React Three Fiber', 'Framer Motion', 'Next.js'],
     color: '#a0a0a0', // Secondary
     distance: 16,
     size: 0.9,
     speed: 0.2,
+    link: 'https://github.com/Archlord12345/rave-solar-system-portfolio'
   },
   {
     id: 4,
-    name: '3D VISUALS',
-    description: 'Expériences interactives spatiales et modélisation 3D.',
-    tech: ['Three.js', 'Blender', 'GLSL', 'Spline'],
+    name: 'PORFOLIO RAVEL',
+    description: 'Une vitrine personnelle mettant en avant mes compétences en développement fullstack.',
+    tech: ['TypeScript', 'React', 'Vite', 'Tailwind'],
     color: '#f9f295', // Bright Gold
     distance: 20,
     size: 0.7,
     speed: 0.15,
+    link: 'https://github.com/Archlord12345/porfolioravel'
   }
 ];
 
@@ -98,12 +102,11 @@ function Planet({ project, onSelect }: { project: typeof PROJECTS[0], onSelect: 
           speed={hovered ? 4 : 2} 
           distort={0.3} 
           radius={1}
-          emissive={project.color}
-          emissiveIntensity={hovered ? 1.5 : 0.2}
         />
         
-        <Html distanceFactor={15} position={[0, project.size + 0.5, 0]} center>
-          <div className={`px-3 py-1 rounded-full border border-white/10 backdrop-blur-md transition-all duration-300 whitespace-nowrap pointer-events-none ${hovered ? 'bg-white/20 scale-110' : 'bg-black/40'}`}>
+        {/* Label visible au survol */}
+        <Html distanceFactor={10} position={[0, project.size + 0.5, 0]}>
+          <div className={`px-2 py-1 rounded-lg backdrop-blur-md transition-all duration-300 whitespace-nowrap pointer-events-none ${hovered ? 'bg-white/20 scale-110' : 'bg-black/40'}`}>
             <span className="text-[10px] font-bold tracking-widest uppercase text-white">{project.name}</span>
           </div>
         </Html>
@@ -203,7 +206,7 @@ export default function Home() {
           <div className="w-10 h-10 rounded-lg bg-[#d4af37] flex items-center justify-center font-black text-black text-xl group-hover:rotate-12 transition-transform">
             R
           </div>
-          <span className="font-bold tracking-tighter text-xl hidden sm:block uppercase text-white">RAVEL NGHOMSI</span>
+          <span className="font-bold tracking-tighter text-xl hidden sm:block uppercase text-white">NGHOMSI FEUKOUO RAVEL</span>
         </div>
 
         <div className="flex gap-4 items-center">
@@ -258,13 +261,13 @@ export default function Home() {
           transition={{ delay: 0.5 }}
           className="max-w-2xl"
         >
-          <h2 className="text-[#d4af37] font-bold tracking-[0.3em] text-xs uppercase mb-4">Architecte Logiciel & Ingénieur IA</h2>
+          <h2 className="text-[#d4af37] font-bold tracking-[0.3em] text-xs uppercase mb-4">Étudiant en Informatique & Développeur Fullstack</h2>
           <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter mb-6 leading-none">
             KERNEL<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f9f295] to-[#d4af37]">FORGE</span>
           </h1>
           <p className="text-gray-400 text-lg max-w-md leading-relaxed mb-8">
-            Expert en automatisation intelligente et architectures immersives. Je repousse les limites du développement Fullstack.
+            Expert en automatisation intelligente avec n8n et leader du groupe KERNEL FORGE. Je repousse les limites du possible.
           </p>
           <div className="flex gap-4 pointer-events-auto">
             <button className="px-8 py-4 bg-gradient-to-r from-[#d4af37] to-[#f9f295] text-black font-black rounded-2xl hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all flex items-center gap-2">
@@ -276,7 +279,7 @@ export default function Home() {
 
       {/* Social Links */}
       <div className="absolute bottom-8 left-8 z-10 flex gap-4">
-        <a href="#" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#d4af37] hover:border-[#d4af37]/40 transition-all">
+        <a href="https://github.com/Archlord12345" target="_blank" rel="noopener noreferrer" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#d4af37] hover:border-[#d4af37]/40 transition-all">
           <Github size={20} />
         </a>
         <a href="#" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#d4af37] hover:border-[#d4af37]/40 transition-all">
@@ -326,9 +329,9 @@ export default function Home() {
                 </div>
 
                 <div className="pt-12 flex flex-col gap-4">
-                  <button className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-white text-black rounded-2xl font-black hover:bg-gray-200 transition-all">
+                  <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-white text-black rounded-2xl font-black hover:bg-gray-200 transition-all">
                     Voir le projet <ExternalLink size={18} />
-                  </button>
+                  </a>
                   <button className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-white hover:bg-white/10 transition-all">
                     Code Source
                   </button>
