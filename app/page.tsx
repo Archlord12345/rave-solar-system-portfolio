@@ -16,6 +16,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Github, Linkedin, Mail, ExternalLink, X, FileText, ChevronRight } from 'lucide-react';
 import * as THREE from 'three';
 
+const SOCIAL_LINKS = {
+  github: 'https://github.com/Archlord12345',
+  linkedin: 'https://www.linkedin.com/in/archlord12345/',
+  email: 'mailto:contact.ravel.dev@gmail.com',
+  cv: 'https://github.com/Archlord12345?tab=repositories'
+};
+
+const METEOR_STACKS = [
+  { name: 'React', color: '#84dcc6', size: 0.16, speed: 0.38 },
+  { name: 'Next.js', color: '#f6bd60', size: 0.17, speed: 0.32 },
+  { name: 'TypeScript', color: '#a9def9', size: 0.15, speed: 0.45 },
+  { name: 'Node.js', color: '#e4c1f9', size: 0.14, speed: 0.34 },
+  { name: 'Three.js', color: '#f28482', size: 0.18, speed: 0.28 },
+  { name: 'n8n', color: '#f2cc8f', size: 0.12, speed: 0.52 },
+  { name: 'Firebase', color: '#90dbf4', size: 0.13, speed: 0.49 },
+  { name: 'Supabase', color: '#95d5b2', size: 0.14, speed: 0.41 }
+];
+
 const PROJECTS = [
   {
     id: 1,
@@ -70,6 +88,72 @@ const PROJECTS = [
     link: 'https://github.com/Archlord12345/porfolioravel'
   }
 ];
+
+function SkillMeteor({
+  stack,
+  index
+}: {
+  stack: typeof METEOR_STACKS[0],
+  index: number
+}) {
+  const meteorRef = useRef<THREE.Mesh>(null);
+  const tailRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
+
+  const lane = 23 + (index % 3) * 3;
+
+  useFrame((state) => {
+    if (!meteorRef.current || !tailRef.current) return;
+    const t = state.clock.getElapsedTime() * stack.speed + index * 1.25;
+
+    const x = Math.sin(t) * lane;
+    const z = Math.cos(t * 1.1) * (lane - 6);
+    const y = Math.sin(t * 2.2) * 2 + (index % 5) - 2;
+
+    meteorRef.current.position.set(x, y, z);
+    meteorRef.current.rotation.x += 0.03;
+    meteorRef.current.rotation.y += 0.02;
+
+    tailRef.current.position.set(x - 1.2, y, z + 0.6);
+    tailRef.current.lookAt(x + 2, y, z - 1.5);
+  });
+
+  return (
+    <group>
+      <mesh ref={tailRef}>
+        <cylinderGeometry args={[0.02, 0.12, 2.2, 8]} />
+        <meshStandardMaterial
+          color={stack.color}
+          emissive={stack.color}
+          emissiveIntensity={1.2}
+          transparent
+          opacity={0.4}
+        />
+      </mesh>
+
+      <mesh
+        ref={meteorRef}
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
+      >
+        <dodecahedronGeometry args={[stack.size, 0]} />
+        <meshStandardMaterial
+          color={stack.color}
+          emissive={stack.color}
+          emissiveIntensity={hovered ? 2.8 : 1.7}
+          metalness={0.3}
+          roughness={0.25}
+        />
+
+        <Html distanceFactor={8} position={[0, stack.size + 0.4, 0]}>
+          <div className="rounded-md border border-white/10 bg-black/50 px-2 py-1 text-[10px] font-bold tracking-wide text-white backdrop-blur pointer-events-none">
+            {stack.name}
+          </div>
+        </Html>
+      </mesh>
+    </group>
+  );
+}
 
 function Planet({ project, index, onSelect }: { project: typeof PROJECTS[0], index: number, onSelect: (p: any) => void }) {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -206,21 +290,37 @@ export default function Home() {
   return (
     <main className="relative w-full h-screen bg-gradient-to-b from-[#030711] via-[#070d1a] to-[#040507] overflow-hidden text-white">
       <nav className="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center backdrop-blur-xl bg-[#040812]/65 border-b border-cyan-200/10">
-        <div className="flex items-center gap-3 group cursor-pointer">
+        <button
+          type="button"
+          onClick={() => setSelectedProject(null)}
+          className="flex items-center gap-3 group cursor-pointer"
+        >
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#f6bd60] to-[#f28482] flex items-center justify-center font-black text-black text-xl group-hover:rotate-12 transition-transform">
             R
           </div>
           <span className="font-bold tracking-tighter text-xl hidden sm:block uppercase text-white">NGHOMSI FEUKOUO RAVEL</span>
-        </div>
+        </button>
 
         <div className="flex gap-4 items-center">
           <div className="hidden md:flex gap-6 text-[10px] tracking-[0.2em] font-bold text-gray-400 uppercase">
-            <button className="hover:text-[#84dcc6] transition-colors">Accueil</button>
-            <button className="hover:text-[#84dcc6] transition-colors">Projets</button>
-            <button className="hover:text-[#84dcc6] transition-colors">Contact</button>
+            <button
+              type="button"
+              onClick={() => setSelectedProject(null)}
+              className="hover:text-[#84dcc6] transition-colors"
+            >
+              Accueil
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedProject(PROJECTS[0])}
+              className="hover:text-[#84dcc6] transition-colors"
+            >
+              Projets
+            </button>
+            <a href={SOCIAL_LINKS.email} className="hover:text-[#84dcc6] transition-colors">Contact</a>
           </div>
           <div className="h-6 w-[1px] bg-white/10 mx-2" />
-          <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#84dcc6]/40 text-[#84dcc6] bg-[#84dcc6]/10 hover:bg-[#84dcc6]/20 transition-all text-xs font-bold">
+          <a href={SOCIAL_LINKS.cv} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#84dcc6]/40 text-[#84dcc6] bg-[#84dcc6]/10 hover:bg-[#84dcc6]/20 transition-all text-xs font-bold">
             <FileText size={14} />
             <span>CV</span>
           </a>
@@ -250,6 +350,9 @@ export default function Home() {
                 onSelect={setSelectedProject}
               />
             ))}
+            {METEOR_STACKS.map((stack, index) => (
+              <SkillMeteor key={stack.name} stack={stack} index={index} />
+            ))}
             <Environment preset="city" />
           </Suspense>
 
@@ -273,7 +376,11 @@ export default function Home() {
             Expert en automatisation intelligente avec n8n. Passionné par la création de solutions innovantes et l'exploration technologique.
           </p>
           <div className="flex gap-4 pointer-events-auto">
-            <button className="px-8 py-4 bg-gradient-to-r from-[#f6bd60] via-[#84dcc6] to-[#a9def9] text-black font-black rounded-2xl hover:shadow-[0_0_30px_rgba(132,220,198,0.4)] transition-all flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedProject(PROJECTS[0])}
+              className="px-8 py-4 bg-gradient-to-r from-[#f6bd60] via-[#84dcc6] to-[#a9def9] text-black font-black rounded-2xl hover:shadow-[0_0_30px_rgba(132,220,198,0.4)] transition-all flex items-center gap-2"
+            >
               Explorer mes projets <ChevronRight size={20} />
             </button>
           </div>
@@ -281,13 +388,13 @@ export default function Home() {
       </div>
 
       <div className="absolute bottom-8 left-8 z-10 flex gap-4">
-        <a href="https://github.com/Archlord12345" target="_blank" rel="noopener noreferrer" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#84dcc6] hover:border-[#84dcc6]/40 transition-all">
+        <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#84dcc6] hover:border-[#84dcc6]/40 transition-all">
           <Github size={20} />
         </a>
-        <a href="#" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#84dcc6] hover:border-[#84dcc6]/40 transition-all">
+        <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#84dcc6] hover:border-[#84dcc6]/40 transition-all">
           <Linkedin size={20} />
         </a>
-        <a href="#" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#84dcc6] hover:border-[#84dcc6]/40 transition-all">
+        <a href={SOCIAL_LINKS.email} className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#84dcc6] hover:border-[#84dcc6]/40 transition-all">
           <Mail size={20} />
         </a>
       </div>
@@ -333,9 +440,14 @@ export default function Home() {
                   <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-white text-black rounded-2xl font-black hover:bg-gray-200 transition-all">
                     Voir le projet <ExternalLink size={18} />
                   </a>
-                  <button className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-white hover:bg-white/10 transition-all">
+                  <a
+                    href={selectedProject.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-white hover:bg-white/10 transition-all"
+                  >
                     Code Source
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
