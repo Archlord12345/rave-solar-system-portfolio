@@ -2,18 +2,15 @@
 
 import React, { Suspense, useState, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { 
-  OrbitControls, 
-  Stars, 
-  Float, 
-  Text, 
-  PerspectiveCamera, 
+import {
+  OrbitControls,
+  Stars,
   ContactShadows,
   Html,
   Environment,
   MeshDistortMaterial,
-  Sphere,
-  useTexture
+  useTexture,
+  Line
 } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Github, Linkedin, Mail, ExternalLink, X, FileText, ChevronRight } from 'lucide-react';
@@ -25,10 +22,12 @@ const PROJECTS = [
     name: 'KERNEL_CHAT',
     description: 'Application de chat intelligente facilitant la collaboration en temps réel.',
     tech: ['n8n', 'React', 'Firebase', 'Node.js'],
-    color: '#d4af37', // Gold
+    color: '#f6bd60',
     distance: 8,
     size: 0.8,
     speed: 0.5,
+    eccentricity: 0.12,
+    inclination: 0.1,
     link: 'https://github.com/Archlord12345/KERNEL_CHAT'
   },
   {
@@ -36,10 +35,12 @@ const PROJECTS = [
     name: 'KERNEL_MEETING',
     description: 'Plateforme de réunion immersive conçue pour optimiser les échanges virtuels.',
     tech: ['WebRTC', 'Next.js', 'Socket.io', 'Tailwind'],
-    color: '#e5e4e2', // Chrome
+    color: '#84dcc6',
     distance: 12,
     size: 1.1,
     speed: 0.3,
+    eccentricity: 0.2,
+    inclination: 0.16,
     link: 'https://github.com/Archlord12345/KERNEL_MEETING'
   },
   {
@@ -47,10 +48,12 @@ const PROJECTS = [
     name: 'SOLAR PORTFOLIO',
     description: 'Ce portfolio immersif en 3D présentant mon système solaire de projets.',
     tech: ['Three.js', 'React Three Fiber', 'Framer Motion', 'Next.js'],
-    color: '#a0a0a0', // Secondary
+    color: '#a9def9',
     distance: 16,
     size: 0.9,
     speed: 0.2,
+    eccentricity: 0.08,
+    inclination: 0.08,
     link: 'https://github.com/Archlord12345/rave-solar-system-portfolio'
   },
   {
@@ -58,36 +61,57 @@ const PROJECTS = [
     name: 'PORFOLIO RAVEL',
     description: 'Une vitrine personnelle mettant en avant mes compétences en développement fullstack.',
     tech: ['TypeScript', 'React', 'Vite', 'Tailwind'],
-    color: '#f9f295', // Bright Gold
+    color: '#e4c1f9',
     distance: 20,
     size: 0.7,
     speed: 0.15,
+    eccentricity: 0.24,
+    inclination: 0.2,
     link: 'https://github.com/Archlord12345/porfolioravel'
   }
 ];
 
-function Planet({ project, onSelect }: { project: typeof PROJECTS[0], onSelect: (p: any) => void }) {
+function Planet({ project, index, onSelect }: { project: typeof PROJECTS[0], index: number, onSelect: (p: any) => void }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
-  
-  // Orbit animation
+
+  const semiMajorAxis = project.distance;
+  const semiMinorAxis = useMemo(
+    () => semiMajorAxis * Math.sqrt(1 - project.eccentricity ** 2),
+    [semiMajorAxis, project.eccentricity]
+  );
+  const orbitRotation = useMemo<[number, number, number]>(
+    () => [project.inclination, index * 0.8, 0],
+    [project.inclination, index]
+  );
+  const orbitPoints = useMemo(
+    () => new THREE.EllipseCurve(0, 0, semiMajorAxis, semiMinorAxis, 0, Math.PI * 2, false, 0)
+      .getPoints(220)
+      .map((point) => new THREE.Vector3(point.x, 0, point.y)),
+    [semiMajorAxis, semiMinorAxis]
+  );
+
   useFrame((state) => {
     if (!meshRef.current) return;
     const t = state.clock.getElapsedTime() * project.speed;
-    meshRef.current.position.x = Math.cos(t) * project.distance;
-    meshRef.current.position.z = Math.sin(t) * project.distance;
+    const theta = t + index;
+    meshRef.current.position.x = Math.cos(theta) * semiMajorAxis;
+    meshRef.current.position.z = Math.sin(theta) * semiMinorAxis;
+    meshRef.current.position.y = Math.sin(theta * 2 + index) * project.inclination * 2;
     meshRef.current.rotation.y += 0.01;
   });
 
   return (
-    <group>
-      {/* Orbit Path */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[project.distance - 0.02, project.distance + 0.02, 128]} />
-        <meshBasicMaterial color="#d4af37" opacity={0.1} transparent />
-      </mesh>
+    <group rotation={orbitRotation}>
+      <Line
+        points={orbitPoints}
+        color={project.color}
+        transparent
+        opacity={hovered ? 0.45 : 0.22}
+        lineWidth={hovered ? 1.6 : 1.1}
+      />
 
-      <mesh 
+      <mesh
         ref={meshRef}
         onClick={(e) => {
           e.stopPropagation();
@@ -97,14 +121,13 @@ function Planet({ project, onSelect }: { project: typeof PROJECTS[0], onSelect: 
         onPointerOut={() => setHovered(false)}
       >
         <sphereGeometry args={[project.size, 32, 32]} />
-        <MeshDistortMaterial 
-          color={project.color} 
-          speed={hovered ? 4 : 2} 
-          distort={0.3} 
+        <MeshDistortMaterial
+          color={project.color}
+          speed={hovered ? 4 : 2}
+          distort={0.25}
           radius={1}
         />
-        
-        {/* Label visible au survol */}
+
         <Html distanceFactor={10} position={[0, project.size + 0.5, 0]}>
           <div className={`px-2 py-1 rounded-lg backdrop-blur-md transition-all duration-300 whitespace-nowrap pointer-events-none ${hovered ? 'bg-white/20 scale-110' : 'bg-black/40'}`}>
             <span className="text-[10px] font-bold tracking-widest uppercase text-white">{project.name}</span>
@@ -118,77 +141,59 @@ function Planet({ project, onSelect }: { project: typeof PROJECTS[0], onSelect: 
 function Sun() {
   const sunRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
-  
-  // Utilisation d'un fallback pour la texture si l'image est manquante
-  const [textureError, setTextureError] = useState(false);
-  
-  // On essaie de charger la texture, si elle échoue on utilise un fallback
-  let texture;
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    texture = useTexture('/ravel.png', () => {
-      console.log("Texture loaded successfully");
-    });
-  } catch (e) {
-    console.warn("Texture /ravel.png not found, using fallback color");
-  }
+  const texture = useTexture('/ravel.png');
 
   useFrame((state) => {
     if (!sunRef.current || !glowRef.current) return;
     sunRef.current.rotation.y += 0.005;
     const t = state.clock.getElapsedTime();
-    
-    // Animation de pulsation douce
+
     const scale = 2.8 + Math.sin(t * 0.5) * 0.1;
     sunRef.current.scale.set(scale, scale, scale);
-    
-    // Animation du halo
+
     glowRef.current.rotation.z -= 0.002;
     glowRef.current.scale.set(scale * 1.2, scale * 1.2, scale * 1.2);
   });
 
   return (
     <group>
-      {/* Le Soleil (Photo de Ravel ou Sphère dorée si manquante) */}
       <mesh ref={sunRef}>
         <sphereGeometry args={[1, 64, 64]} />
-        <meshStandardMaterial 
-          map={textureError ? null : texture}
-          color={textureError ? "#d4af37" : "#ffffff"}
-          emissive="#d4af37" 
-          emissiveIntensity={textureError ? 1 : 0.4} 
+        <meshStandardMaterial
+          map={texture}
+          color="#ffffff"
+          emissive="#d4af37"
+          emissiveIntensity={0.45}
           roughness={0.3}
           metalness={0.7}
         />
       </mesh>
 
-      {/* Halo lumineux pour mettre en valeur */}
       <mesh ref={glowRef}>
         <torusGeometry args={[1.1, 0.01, 16, 100]} />
-        <meshStandardMaterial 
-          color="#d4af37" 
-          emissive="#d4af37" 
-          emissiveIntensity={5} 
-          transparent 
+        <meshStandardMaterial
+          color="#f6bd60"
+          emissive="#f6bd60"
+          emissiveIntensity={4}
+          transparent
           opacity={0.8}
         />
       </mesh>
 
-      {/* Deuxième anneau de halo */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[1.15, 0.005, 16, 100]} />
-        <meshStandardMaterial color="#f9f295" emissive="#f9f295" emissiveIntensity={2} />
+        <meshStandardMaterial color="#a9def9" emissive="#a9def9" emissiveIntensity={1.7} />
       </mesh>
 
-      <pointLight intensity={3000} distance={120} color="#d4af37" />
-      <pointLight position={[-10, -10, -10]} intensity={800} color="#f9f295" />
-      
+      <pointLight intensity={3000} distance={120} color="#f6bd60" />
+      <pointLight position={[-10, -10, -10]} intensity={800} color="#84dcc6" />
+
       <Html position={[0, -3.5, 0]} center>
         <div className="text-center pointer-events-none">
-          <h2 className="text-[#d4af37] font-black text-2xl tracking-[0.2em] uppercase drop-shadow-[0_0_10px_rgba(212,175,55,0.8)]">
+          <h2 className="text-[#f6bd60] font-black text-2xl tracking-[0.2em] uppercase drop-shadow-[0_0_10px_rgba(246,189,96,0.8)]">
             RAVEL
           </h2>
-          <div className="h-[2px] w-12 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent mx-auto mt-1" />
+          <div className="h-[2px] w-12 bg-gradient-to-r from-transparent via-[#84dcc6] to-transparent mx-auto mt-1" />
         </div>
       </Html>
     </group>
@@ -199,11 +204,10 @@ export default function Home() {
   const [selectedProject, setSelectedProject] = useState<typeof PROJECTS[0] | null>(null);
 
   return (
-    <main className="relative w-full h-screen bg-[#050505] overflow-hidden">
-      {/* Navigation Header */}
-      <nav className="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center backdrop-blur-md bg-black/40 border-b border-white/5">
+    <main className="relative w-full h-screen bg-gradient-to-b from-[#030711] via-[#070d1a] to-[#040507] overflow-hidden text-white">
+      <nav className="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center backdrop-blur-xl bg-[#040812]/65 border-b border-cyan-200/10">
         <div className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-10 h-10 rounded-lg bg-[#d4af37] flex items-center justify-center font-black text-black text-xl group-hover:rotate-12 transition-transform">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#f6bd60] to-[#f28482] flex items-center justify-center font-black text-black text-xl group-hover:rotate-12 transition-transform">
             R
           </div>
           <span className="font-bold tracking-tighter text-xl hidden sm:block uppercase text-white">NGHOMSI FEUKOUO RAVEL</span>
@@ -211,86 +215,83 @@ export default function Home() {
 
         <div className="flex gap-4 items-center">
           <div className="hidden md:flex gap-6 text-[10px] tracking-[0.2em] font-bold text-gray-400 uppercase">
-            <button className="hover:text-[#d4af37] transition-colors">Accueil</button>
-            <button className="hover:text-[#d4af37] transition-colors">Projets</button>
-            <button className="hover:text-[#d4af37] transition-colors">Contact</button>
+            <button className="hover:text-[#84dcc6] transition-colors">Accueil</button>
+            <button className="hover:text-[#84dcc6] transition-colors">Projets</button>
+            <button className="hover:text-[#84dcc6] transition-colors">Contact</button>
           </div>
           <div className="h-6 w-[1px] bg-white/10 mx-2" />
-          <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#d4af37]/40 text-[#d4af37] bg-[#d4af37]/5 hover:bg-[#d4af37]/20 transition-all text-xs font-bold">
+          <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#84dcc6]/40 text-[#84dcc6] bg-[#84dcc6]/10 hover:bg-[#84dcc6]/20 transition-all text-xs font-bold">
             <FileText size={14} />
             <span>CV</span>
           </a>
         </div>
       </nav>
 
-      {/* 3D Scene */}
       <div className="absolute inset-0 z-0">
         <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 25, 40], fov: 45 }}>
-          <OrbitControls 
-            enablePan={false} 
-            maxDistance={80} 
+          <OrbitControls
+            enablePan={false}
+            maxDistance={80}
             minDistance={15}
             autoRotate={!selectedProject}
             autoRotateSpeed={0.3}
           />
-          
+
           <Stars radius={100} depth={50} count={7000} factor={4} saturation={0} fade speed={1} />
           <ambientLight intensity={0.2} />
-          
+
           <Suspense fallback={null}>
             <Sun />
-            {PROJECTS.map((project) => (
-              <Planet 
-                key={project.id} 
-                project={project} 
-                onSelect={setSelectedProject} 
+            {PROJECTS.map((project, index) => (
+              <Planet
+                key={project.id}
+                project={project}
+                index={index}
+                onSelect={setSelectedProject}
               />
             ))}
             <Environment preset="city" />
           </Suspense>
-          
+
           <ContactShadows position={[0, -15, 0]} opacity={0.4} scale={60} blur={2} far={20} />
         </Canvas>
       </div>
 
-      {/* Hero Text Overlay */}
       <div className="absolute inset-0 pointer-events-none flex flex-col justify-center px-12 z-10">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
           className="max-w-2xl"
         >
-          <h2 className="text-[#d4af37] font-bold tracking-[0.3em] text-xs uppercase mb-4">Étudiant en Informatique & Développeur Fullstack</h2>
+          <h2 className="text-[#84dcc6] font-bold tracking-[0.3em] text-xs uppercase mb-4">Étudiant en Informatique & Développeur Fullstack</h2>
           <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6 leading-none uppercase">
             NGHOMSI FEUKOUO<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f9f295] to-[#d4af37]">RAVEL</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#f6bd60] via-[#a9def9] to-[#e4c1f9]">RAVEL</span>
           </h1>
-          <p className="text-gray-400 text-lg max-w-md leading-relaxed mb-8">
+          <p className="text-gray-300 text-lg max-w-md leading-relaxed mb-8">
             Expert en automatisation intelligente avec n8n. Passionné par la création de solutions innovantes et l'exploration technologique.
           </p>
           <div className="flex gap-4 pointer-events-auto">
-            <button className="px-8 py-4 bg-gradient-to-r from-[#d4af37] to-[#f9f295] text-black font-black rounded-2xl hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all flex items-center gap-2">
+            <button className="px-8 py-4 bg-gradient-to-r from-[#f6bd60] via-[#84dcc6] to-[#a9def9] text-black font-black rounded-2xl hover:shadow-[0_0_30px_rgba(132,220,198,0.4)] transition-all flex items-center gap-2">
               Explorer mes projets <ChevronRight size={20} />
             </button>
           </div>
         </motion.div>
       </div>
 
-      {/* Social Links */}
       <div className="absolute bottom-8 left-8 z-10 flex gap-4">
-        <a href="https://github.com/Archlord12345" target="_blank" rel="noopener noreferrer" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#d4af37] hover:border-[#d4af37]/40 transition-all">
+        <a href="https://github.com/Archlord12345" target="_blank" rel="noopener noreferrer" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#84dcc6] hover:border-[#84dcc6]/40 transition-all">
           <Github size={20} />
         </a>
-        <a href="#" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#d4af37] hover:border-[#d4af37]/40 transition-all">
+        <a href="#" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#84dcc6] hover:border-[#84dcc6]/40 transition-all">
           <Linkedin size={20} />
         </a>
-        <a href="#" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#d4af37] hover:border-[#d4af37]/40 transition-all">
+        <a href="#" className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:text-[#84dcc6] hover:border-[#84dcc6]/40 transition-all">
           <Mail size={20} />
         </a>
       </div>
 
-      {/* Project Detail Modal */}
       <AnimatePresence>
         {selectedProject && (
           <motion.div
@@ -299,7 +300,7 @@ export default function Home() {
             exit={{ opacity: 0, x: 100 }}
             className="absolute top-0 right-0 h-full w-full md:w-[500px] bg-black/90 backdrop-blur-2xl border-l border-white/10 p-12 z-50 flex flex-col"
           >
-            <button 
+            <button
               onClick={() => setSelectedProject(null)}
               className="absolute top-8 right-8 p-3 hover:bg-white/10 rounded-2xl transition-colors text-white"
             >
@@ -307,8 +308,8 @@ export default function Home() {
             </button>
 
             <div className="mt-16">
-              <div 
-                className="w-16 h-16 rounded-2xl mb-8 rotate-12 shadow-2xl" 
+              <div
+                className="w-16 h-16 rounded-2xl mb-8 rotate-12 shadow-2xl"
                 style={{ backgroundColor: selectedProject.color }}
               />
               <h2 className="text-4xl font-black mb-6 text-white tracking-tighter uppercase">{selectedProject.name}</h2>
@@ -318,7 +319,7 @@ export default function Home() {
 
               <div className="space-y-8">
                 <div>
-                  <h3 className="text-[10px] uppercase tracking-[0.2em] text-[#d4af37] font-bold mb-4">Technologies Clés</h3>
+                  <h3 className="text-[10px] uppercase tracking-[0.2em] text-[#84dcc6] font-bold mb-4">Technologies Clés</h3>
                   <div className="flex flex-wrap gap-3">
                     {selectedProject.tech.map((t) => (
                       <span key={t} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-white">
